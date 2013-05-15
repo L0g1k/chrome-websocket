@@ -31,43 +31,6 @@ function computeKey(key) {
         chars = parseInt(key.replace(/[^0-9]/g, ''));
     return (chars / length);
 }
- 
-// protocol 00
-// http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-00
-/*
-function HandshakeHYBI00(request) {
-    // split up lines and parse
-    var lines = request.split('\r\n'),
-        headers = parseHeaders(lines);
-    if ('sec-websocket-key1' in headers &&
-        'sec-websocket-key2' in headers) {
-        var key1 = computeKey(headers['sec-websocket-key1']),
-            key2 = computeKey(headers['sec-websocket-key2']),
-           
-            data = request.slice(-8, request.length),
-            // md5 hhash
-            hash = crypto.createHash('md5');
-        // update hash with all values
-        hash.update(bigEndian(key1));
-        hash.update(bigEndian(key2));
-        hash.update(data);
-        // TODO: make this a template maybe
-        var response = [
-            'HTTP/1.1 101 WebSocket Protocol Handshake',
-            'Upgrade: WebSocket',
-            'Connection: Upgrade',
-            'Sec-WebSocket-Origin: ' + headers['origin'],
-            // TODO: ws or wss
-            // TODO: add actual request path
-            'Sec-WebSocket-Location: ws://' + headers['host'] + '/',
-            '',
-            hash.digest('binary')
-        ];
-        return response;
-    }
-    return false;
-}
-*/
 
 function HandshakeHYBI00(request) {
     // split up lines and parse
@@ -89,7 +52,7 @@ function HandshakeHYBI00(request) {
       , 'Upgrade: websocket'
       , 'Connection: Upgrade'
       , 'Sec-WebSocket-Accept: ' + key
-      , 'Access-Control-Allow-Origin: http://www.websocket.org'
+      , 'Access-Control-Allow-Origin: *'
       , ''
     ];
 
@@ -102,8 +65,6 @@ function HandshakeHYBI00(request) {
 
 }
 
-
- 
 function parseHeaders(headers) {
     // splits a list of headers into key/value pairs
     var parsedHeaders = {};
@@ -140,7 +101,11 @@ var WebsocketServer = net.createServer(function (socket) {
         // are we connected?
        
         if (wsConnected) {
-            console.log(arrayBufferToString(data));
+            var raw = decodeWebSocket(data);
+            var decoded = String.fromCharCode.apply(null, raw);
+           // var decoded = decodeWebSocket(raw);
+            console.log(decoded);
+
         }
         else {
             var response = HandshakeHYBI00(data.toString('binary'));
@@ -162,6 +127,36 @@ var WebsocketServer = net.createServer(function (socket) {
     });
  
 });
+
+function decodeWebSocket (bytes){
+    var datalength = bytes.readUInt8(1) & 127;
+    var indexFirstMask = 2;
+    if (datalength == 126) {
+        indexFirstMask = 4;
+    } else if (datalength == 127) {
+        indexFirstMask = 10;
+    }
+    var masks = bytes.slice(indexFirstMask, indexFirstMask + 4);
+    var indexFirstDataByte = indexFirstMask + 4;
+    var j = 0;
+    var i = indexFirstDataByte;
+    var output = []
+    while (i < bytes.length) {
+        var dataByte = bytes.readUInt8(i++);
+        var maskByte = masks.readUInt8(j++ % 4);
+        output[j] = dataByte ^ maskByte;
+    }
+    return output;
+}
+
+function toArrayBuffer(buffer) {
+    var ab = new ArrayBuffer(buffer.length);
+    var view = new Uint8Array(ab);
+    for (var i = 0; i < buffer.length; ++i) {
+        view[i] = buffer[i];
+    }
+    return ab;
+}
 
 function arrayBufferToString(buffer) {
     var str = '';

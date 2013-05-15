@@ -313,6 +313,7 @@ net.Socket.prototype._read = function() {
   chrome.socket.read(self._socketInfo.socketId, function(readInfo) {
     if(readInfo.resultCode < 0) return;
     // ArrayBuffer to Buffer if no encoding.
+    console.log(Array.prototype.slice.call(new Uint8Array(readInfo.data)).join(","));
     var buffer = arrayBufferToBuffer(readInfo.data);
     self.emit('data', buffer);
     if (self.ondata) self.ondata(buffer.parent, buffer.offset, buffer.offset + buffer.length);
