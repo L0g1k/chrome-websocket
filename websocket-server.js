@@ -7,30 +7,7 @@
 'use strict';
  
 var net = require('net'),
-    crypto2 = require('crypto');
- 
-function bigEndian(value) {
-    var result = [
-        String.fromCharCode(value >> 24 & 0xFF),
-        String.fromCharCode(value >> 16 & 0xFF),
-        String.fromCharCode(value >> 8 & 0xFF),
-        String.fromCharCode(value & 0xFF)
-    ];
-    return result.join('');
-}
- 
-function computeKey(key) {
-    /*
-     * For each of these fields, the server has to
-     * take the digits from the value to obtain a
-     * number, then divide that number by the number
-     * of spaces characters in the value to obtain
-     * a 32-bit number.
-     */
-    var length = parseInt(key.match(/\s/g).length),
-        chars = parseInt(key.replace(/[^0-9]/g, ''));
-    return (chars / length);
-}
+ crypto2 = require('crypto');
 
 function HandshakeHYBI00(request) {
     // split up lines and parse
@@ -93,40 +70,96 @@ function parseHeaders(headers) {
     return parsedHeaders;
 }
  
-var WebsocketServer = net.createServer(function (socket) {
-    // listen for connections
-    var wsConnected = false;
- 
-    socket.addListener('data', function (data) {
-        // are we connected?
-       
-        if (wsConnected) {
-            var raw = decodeWebSocket(data);
-            var decoded = String.fromCharCode.apply(null, raw);
-           // var decoded = decodeWebSocket(raw);
-            console.log(decoded);
+function WebSocketServer(port, bindAddress) {
+    this.port = port;
+    this.bindAddress = bindAddress;
+    var self = this;
+    net.createServer(function (socket) {
 
-        }
-        else {
-            var response = HandshakeHYBI00(data.toString('binary'));
-            if (response) {
-                // handshake succeeded, open connection
-                var handshakeString = response.join('\r\n') + "\r\n";
-                socket.write(handshakeString, 'ascii', function(){
-                    console.log('wrote data');
-                });
-               
-                wsConnected = true;
+        var wsConnected = false;
+        self.socket = socket;
+
+        socket.addListener('data', function (data) {
+           
+            if (wsConnected) {
+                if(data.length) {
+                    var raw = decodeWebSocket(data);
+                    var decoded = String.fromCharCode.apply(null, raw);
+                    console.log(decoded);
+                    if(self.callback)
+                        self.callback(decoded);
+                }
+
+            } else {
+
+                var response = HandshakeHYBI00(data.toString('binary'));
+                if (response) {
+                    // handshake succeeded, open connection
+                    var handshakeString = response.join('\r\n') + "\r\n";
+                    socket.write(handshakeString, 'ascii', function(){
+                        console.log('Completing handshake');
+                    });
+                   
+                    wsConnected = true;
+                }
+                else {
+                    // close connection, handshake bad
+                    socket.end();
+                    console.error('Bad handshake');
+                    return;
+                }
+
             }
-            else {
-                // close connection, handshake bad
-                socket.end();
-                return;
-            }
-        }
-    });
- 
-});
+        });
+     
+    }).listen(port, bindAddress);
+}
+
+WebSocketServer.prototype.send = function(message) {
+    if(typeof this.socket !== 'undefined') {
+        var data = encodeWebSocket(message);
+        this.socket.write(data);
+    } else console.warn("There is nobody to send to");
+}
+
+WebSocketServer.prototype.onMessage = function(callback) {
+    this.callback = callback;
+}
+
+function encodeWebSocket(bytesRaw){
+    var bytesFormatted;
+    var indexStartRawData;
+    if (bytesRaw.length <= 125) {
+        indexStartRawData = 2;
+        bytesFormatted = new Buffer(bytesRaw.length + 2);
+        bytesFormatted.writeUInt8(bytesRaw.length, 1);
+    } else if (bytesRaw.length >= 126 && bytesRaw.length <= 65535) {
+        indexStartRawData = 4;
+        bytesFormatted = new Buffer(bytesRaw.length + 4);
+        bytesFormatted.writeUInt8(126, 1);
+        bytesFormatted.writeUInt8(( bytesRaw.length >> 8 ) & 255, 2);
+        bytesFormatted.writeUInt8(( bytesRaw.length      ) & 255, 3);
+    } else {
+        indexStartRawData = 10;
+        bytesFormatted = new Buffer(bytesRaw.length + 10);
+        bytesFormatted.writeUInt8(127, 1);
+        bytesFormatted.writeUInt8(( bytesRaw.length >> 56 ) & 255, 2);
+        bytesFormatted.writeUInt8(( bytesRaw.length >> 48 ) & 255, 3);
+        bytesFormatted.writeUInt8(( bytesRaw.length >> 40 ) & 255, 4);
+        bytesFormatted.writeUInt8(( bytesRaw.length >> 32 ) & 255 ,5);
+        bytesFormatted.writeUInt8(( bytesRaw.length >> 24 ) & 255, 6);
+        bytesFormatted.writeUInt8(( bytesRaw.length >> 16 ) & 255, 7);
+        bytesFormatted.writeUInt8(( bytesRaw.length >>  8 ) & 255, 8);
+        bytesFormatted.writeUInt8(( bytesRaw.length       ) & 255, 9);
+    }
+    
+    bytesFormatted.writeUInt8(129, 0);
+
+    for (var i = 0; i < bytesRaw.length; i++){
+        bytesFormatted.writeUInt8(bytesRaw.charCodeAt(i), indexStartRawData + i);
+    }
+    return bytesFormatted;
+}
 
 function decodeWebSocket (bytes){
     var datalength = bytes.readUInt8(1) & 127;
@@ -167,5 +200,6 @@ function arrayBufferToString(buffer) {
     return str;
 };
 
-WebsocketServer.listen(9000, "127.0.0.1");
+var wss = new WebSocketServer(9000, "127.0.0.1");
+wss.onMessage(function(message) {console.log("Server: message received: " + message)});
  

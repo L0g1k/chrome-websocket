@@ -22,7 +22,7 @@ var events = require('events');
 var util = require('util');
 var Stream = require('stream');
 var Buffer = require('buffer').Buffer;
-
+if(window) window.Buffer = Buffer; // <-- hack for websocket-server.js to avoid recompiling
 var stringToArrayBuffer = function(str) {
   var buffer = new ArrayBuffer(str.length);
   var uint8Array = new Uint8Array(buffer);
@@ -33,7 +33,12 @@ var stringToArrayBuffer = function(str) {
 };
 
 var bufferToArrayBuffer = function(buffer) {
-  return stringToArrayBuffer(buf.toString())
+  var ab = new ArrayBuffer(buffer.length);
+  var view = new Uint8Array(ab);
+  for (var i = 0; i < buffer.length; ++i) {
+      view[i] = buffer.readUInt8(i);
+  }
+  return ab;
 };
 
 var arrayBufferToBuffer = function(arrayBuffer) {
@@ -313,7 +318,7 @@ net.Socket.prototype._read = function() {
   chrome.socket.read(self._socketInfo.socketId, function(readInfo) {
     if(readInfo.resultCode < 0) return;
     // ArrayBuffer to Buffer if no encoding.
-    console.log(Array.prototype.slice.call(new Uint8Array(readInfo.data)).join(","));
+    //console.log(Array.prototype.slice.call(new Uint8Array(readInfo.data)).join(","));
     var buffer = arrayBufferToBuffer(readInfo.data);
     self.emit('data', buffer);
     if (self.ondata) self.ondata(buffer.parent, buffer.offset, buffer.offset + buffer.length);
