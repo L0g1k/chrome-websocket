@@ -200,6 +200,5 @@ function arrayBufferToString(buffer) {
     return str;
 };
 
-var wss = new WebSocketServer(9000, "127.0.0.1");
-wss.onMessage(function(message) {console.log("Server: message received: " + message)});
+
  
