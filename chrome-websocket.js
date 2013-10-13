@@ -1,8 +1,39 @@
+/**
+
+ The MIT License (MIT)
+
+Copyright (c) 2013 Jason Mitcheson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+**/
+
+/**
+ * Made by using node-chromify, net-chromify, and actual server implementation based
+ * on https://gist.github.com/bradleywright/1021082
+ */
+
 (function(){
 
-    var require=(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({"net":[function(require,module,exports){
-        module.exports=require('3tvzvh');
-    },{}],"3tvzvh":[function(require,module,exports){
+    var require2=(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require2=="function"&&require2;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require2=="function"&&require2;for(var s=0;s<n.length;s++)i(n[s]);return i})({"net":[function(require2,module,exports){
+        module.exports=require2('3tvzvh');
+    },{}],"3tvzvh":[function(require2,module,exports){
         (function(){/*
          Copyright 2012 Google Inc
 
@@ -12,19 +43,19 @@
 
          http://www.apache.org/licenses/LICENSE-2.0
 
-         Unless required by applicable law or agreed to in writing, software
+         Unless require2d by applicable law or agreed to in writing, software
          distributed under the License is distributed on an "AS IS" BASIS,
          WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
          See the License for the specific language governing permissions and
-         limitations under the License.
+         limitations under the License.                  f
          */
 
             var net = module.exports;
-            var events = require('events');
-            var util = require('util');
-            var Stream = require('stream');
-            var Buffer = require('buffer').Buffer;
-            if(window) window.Buffer = Buffer; // <-- hack for websocket-server.js to avoid recompiling
+            var events = require2('events');
+            var util = require2('util');
+            var Stream = require2('stream');
+            var Buffer = require2('buffer').Buffer;
+           // if(window) window.Buffer = Buffer; // <-- hack for websocket-server.js to avoid recompiling
             var stringToArrayBuffer = function(str) {
                 var buffer = new ArrayBuffer(str.length);
                 var uint8Array = new Uint8Array(buffer);
@@ -105,44 +136,7 @@
                 this.__defineGetter__("connections", function() { return _connections; });
 
                 events.EventEmitter.call(this);
-                // if (!(this instanceof Server)) return new Server(arguments[0], arguments[1]);
-                // events.EventEmitter.call(this);
 
-                // var self = this;
-
-                // var options;
-
-                // if (typeof arguments[0] == 'function') {
-                //   options = {};
-                //   self.on('connection', arguments[0]);
-                // } else {
-                //   options = arguments[0] || {};
-
-                //   if (typeof arguments[1] == 'function') {
-                //     self.on('connection', arguments[1]);
-                //   }
-                // }
-
-                // this._connections = 0;
-
-                // // when server is using slaves .connections is not reliable
-                // // so null will be return if thats the case
-                // Object.defineProperty(this, 'connections', {
-                //   get: function() {
-                //     if (self._usingSlaves) {
-                //       return null;
-                //     }
-                //     return self._connections;
-                //   },
-                //   set: function(val) {
-                //     return (self._connections = val);
-                //   },
-                //   configurable: true, enumerable: true
-                // });
-
-                // this.allowHalfOpen = options.allowHalfOpen || false;
-
-                // this._handle = null;
             }
             net.Server = Server;
             util.inherits(net.Server, events.EventEmitter);
@@ -210,6 +204,7 @@
 
             net.Socket = function(options) {
                 var createNew = false;
+                var allowHalfOpen;
                 if(options){
                     createNew = true;
                 }
@@ -385,8 +380,8 @@
             });
 
         })()
-    },{"events":1,"util":2,"stream":3,"buffer":4}],2:[function(require,module,exports){
-        var events = require('events');
+    },{"events":1,"util":2,"stream":3,"buffer":4}],2:[function(require2,module,exports){
+        var events = require2('events');
 
         exports.isArray = isArray;
         exports.isDate = function(obj){return Object.prototype.toString.call(obj) === '[object Date]'};
@@ -429,8 +424,8 @@
                         'regexp': 'red' }[styleType];
 
                 if (style) {
-                    return '\033[' + styles[style][0] + 'm' + str +
-                        '\033[' + styles[style][1] + 'm';
+                    return '\x1B[' + styles[style][0] + 'm' + str +
+                        '\x1B[' + styles[style][1] + 'm';
                 } else {
                     return str;
                 }
@@ -738,12 +733,12 @@
             return str;
         };
 
-    },{"events":1}],"crypto":[function(require,module,exports){
-        module.exports=require('gCyZyB');
-    },{}],"gCyZyB":[function(require,module,exports){
-        var sha = require('./sha')
-        var rng = require('./rng')
-        var md5 = require('./md5')
+    },{"events":1}],"crypto":[function(require2,module,exports){
+        module.exports=require2('gCyZyB');
+    },{}],"gCyZyB":[function(require2,module,exports){
+        var sha = require2('./sha')
+        var rng = require2('./rng')
+        var md5 = require2('./md5')
 
         var algorithms = {
             sha1: {
@@ -816,7 +811,7 @@
                 }
             })
 
-    },{"./rng":5,"./md5":6,"./sha":7}],8:[function(require,module,exports){
+    },{"./rng":5,"./md5":6,"./sha":7}],8:[function(require2,module,exports){
 // shim for using process in browser
 
         var process = module.exports = {};
@@ -870,7 +865,7 @@
             throw new Error('process.chdir is not supported');
         };
 
-    },{}],1:[function(require,module,exports){
+    },{}],1:[function(require2,module,exports){
         (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
             var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -1055,10 +1050,10 @@
                 return this._events[type];
             };
 
-        })(require("__browserify_process"))
-    },{"__browserify_process":8}],3:[function(require,module,exports){
-        var events = require('events');
-        var util = require('util');
+        })(require2("__browserify_process"))
+    },{"__browserify_process":8}],3:[function(require2,module,exports){
+        var events = require2('events');
+        var util = require2('util');
 
         function Stream() {
             events.EventEmitter.call(this);
@@ -1177,10 +1172,10 @@
             return dest;
         };
 
-    },{"events":1,"util":2}],9:[function(require,module,exports){
+    },{"events":1,"util":2}],9:[function(require2,module,exports){
         (function(){// UTILITY
-            var util = require('util');
-            var Buffer = require("buffer").Buffer;
+            var util = require2('util');
+            var Buffer = require2("buffer").Buffer;
             var pSlice = Array.prototype.slice;
 
             function objectKeys(object) {
@@ -1494,7 +1489,7 @@
             assert.ifError = function(err) { if (err) {throw err;}};
 
         })()
-    },{"util":2,"buffer":4}],5:[function(require,module,exports){
+    },{"util":2,"buffer":4}],5:[function(require2,module,exports){
 // Original code adapted from Robert Kieffer.
 // details at https://github.com/broofa/node-uuid
         (function() {
@@ -1532,7 +1527,7 @@
             module.exports = whatwgRNG || mathRNG;
 
         }())
-    },{}],6:[function(require,module,exports){
+    },{}],6:[function(require2,module,exports){
         /*
          * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
          * Digest Algorithm, as defined in RFC 1321.
@@ -1918,7 +1913,7 @@
         exports.b64_md5 = b64_md5;
         exports.any_md5 = any_md5;
 
-    },{}],7:[function(require,module,exports){
+    },{}],7:[function(require2,module,exports){
         /*
          * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
          * in FIPS PUB 180-1
@@ -2130,7 +2125,7 @@
         }
 
 
-    },{}],10:[function(require,module,exports){
+    },{}],10:[function(require2,module,exports){
         exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
             var e, m,
                 eLen = nBytes * 8 - mLen - 1,
@@ -2216,12 +2211,12 @@
             buffer[offset + i - d] |= s * 128;
         };
 
-    },{}],4:[function(require,module,exports){
+    },{}],4:[function(require2,module,exports){
         (function(){function SlowBuffer (size) {
             this.length = size;
         };
 
-            var assert = require('assert');
+            var assert = require2('assert');
 
             exports.INSPECT_MAX_BYTES = 50;
 
@@ -2255,7 +2250,7 @@
             }
 
             function base64ToBytes(str) {
-                return require("base64-js").toByteArray(str);
+                return require2("base64-js").toByteArray(str);
             }
 
             SlowBuffer.byteLength = function (str, encoding) {
@@ -2310,7 +2305,7 @@
 
             SlowBuffer.prototype.base64Slice = function (start, end) {
                 var bytes = Array.prototype.slice.apply(this, arguments)
-                return require("base64-js").fromByteArray(bytes);
+                return require2("base64-js").fromByteArray(bytes);
             }
 
             function decodeUtf8Char(str) {
@@ -3160,7 +3155,7 @@
                         'Trying to read beyond buffer length');
                 }
 
-                return require('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
+                return require2('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
                     23, 4);
             }
 
@@ -3181,7 +3176,7 @@
                         'Trying to read beyond buffer length');
                 }
 
-                return require('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
+                return require2('./buffer_ieee754').readIEEE754(buffer, offset, isBigEndian,
                     52, 8);
             }
 
@@ -3465,7 +3460,7 @@
                     verifIEEE754(value, 3.4028234663852886e+38, -3.4028234663852886e+38);
                 }
 
-                require('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
+                require2('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
                     23, 4);
             }
 
@@ -3494,7 +3489,7 @@
                     verifIEEE754(value, 1.7976931348623157E+308, -1.7976931348623157E+308);
                 }
 
-                require('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
+                require2('./buffer_ieee754').writeIEEE754(buffer, value, offset, isBigEndian,
                     52, 8);
             }
 
@@ -3536,9 +3531,9 @@
             SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
         })()
-    },{"assert":9,"./buffer_ieee754":10,"base64-js":11}],11:[function(require,module,exports){
+    },{"assert":9,"./buffer_ieee754":10,"base64-js":11}],11:[function(require2,module,exports){
         (function (exports) {
-            //'use strict';
+            'use strict';
 
             var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -3624,18 +3619,16 @@
 
     },{}]},{},[])
     ;
-
-
     /*
      * node-ws - pure Javascript WebSockets server
      * Copyright Bradley Wright <brad@intranation.com>
      */
 
 // Use strict compilation rules - we're not animals
-    //'use strict';
+    'use strict';
 
-    var net = require('net'),
-        crypto2 = require('crypto');
+    var net = require2('net'),
+        crypto2 = require2('crypto');
 
     function HandshakeHYBI00(request) {
         // split up lines and parse
@@ -3744,6 +3737,9 @@
     }
 
     WebSocketServer.prototype.send = function(message) {
+        if(typeof message == 'object') {
+            message = JSON.stringify(message);
+        }
         if(typeof this.socket !== 'undefined') {
             var data = encodeWebSocket(message);
             this.socket.write(data);
@@ -3828,5 +3824,19 @@
         return str;
     };
 
-    window.WebSocketServer = WebSocketServer;
+/*
+
+ var wss = new WebSocketServer(9000, "127.0.0.1");
+ wss.onMessage(function(message) {console.log("Server: message received: " + message)});
+ var ws = new WebSocket("ws://127.0.0.1:9000");
+ setTimeout(function() { ws.send("Testing") }, 250);
+
+
+ NB: Very large messages get "stuck" due to an unknown flaw somewhere in this implementation.
+
+ */
+
+
+window.WebSocketServer = WebSocketServer;
+
 })()
